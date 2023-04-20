@@ -20,17 +20,17 @@ The common configuration elements of TCP/IP and their purposes are as follows:
 
 - **Gateway Address**: A Gateway Address is the IP address through which a particular network, or host on a network, may be reached. If one network host wishes to communicate with another network host, and that host is not located on the same network, then a gateway must be used. In many cases, the Gateway Address will be that of a router on the same network, which will in turn pass traffic on to other networks or hosts, such as Internet hosts. The value of the Gateway Address setting must be correct, or your system will not be able to reach any hosts beyond those on the same network.
 
-- **Nameserver Address**: Nameserver Addresses represent the IP addresses of Domain Name Service (DNS) systems, which resolve network hostnames into IP addresses. There are three levels of Nameserver Addresses, which may be specified in order of precedence: The Primary Nameserver, the Secondary Nameserver, and the Tertiary Nameserver. In order for your system to be able to resolve network hostnames into their corresponding IP addresses, you must specify valid Nameserver Addresses which you are authorized to use in your system's TCP/IP configuration. In many cases these addresses can and will be provided by your network service provider,but many free and publicly accessible nameservers are available for use, such as the Level3 (Verizon) servers with IP addresses from 4.2.2.1 to 4.2.2.6.
+- **Nameserver Address**: Nameserver Addresses represent the IP addresses of Domain Name Service (DNS) systems, which resolve network hostnames into IP addresses. There are three levels of Nameserver Addresses, which may be specified in order of precedence: The Primary Nameserver, the Secondary Nameserver, and the Tertiary Nameserver. In order for your system to be able to resolve network hostnames into their corresponding IP addresses, you must specify valid Nameserver Addresses which you are authorized to use in your system's TCP/IP configuration. In many cases these addresses can and will be provided by your network service provider,but many free and publicly accessible nameservers are available for use, such as the Level3 (Verizon) servers with IP addresses from `4.2.2.1` to `4.2.2.6`.
 
 > Tip: The IP address, Netmask, Network Address, Broadcast Address, Gateway Address, and Nameserver Addresses are typically specified via the appropriate directives in the file /etc/network/interfaces (before Ubuntu 18.04, see below). For more information, view the system manual page for interfaces: `man interfaces`
 
 ### Netplan
 
-Ubuntu 18.04 (LTS) has switched from **ifupdown** to **Netplan** for configuring network interfaces. Netplan is based on YAML config files that makes configuration process very simple. Netplan has replaced the old configuration file` /etc/network/interface`s that was previously used for configuring network interfaces in Ubuntu.
+Ubuntu 18.04 (LTS) has switched from **ifupdown** to **Netplan** for configuring network interfaces. Netplan is based on YAML config files that makes configuration process very simple. Netplan has replaced the old configuration file `/etc/network/interfaces` that was previously used for configuring network interfaces in Ubuntu.
 
 During early boot, the Netplan *networkd renderer* runs, reads /{lib,etc,run}/netplan/*.yaml and writes configuration to /run to hand off control of devices to the specified networking daemon:
 
-- configured devices get handled by` systemd-network`d by default, unless explicitly marked as managed by a specific renderer (**NetworkManager**)
+- configured devices get handled by `systemd-networkd` by default, unless explicitly marked as managed by a specific renderer (**NetworkManager**)
 - devices not covered by the network config do not get touched at all.
 
 If you are not on an Ubuntu Server, but on Desktop, chances are that the network is driven by the NetworkManager.
@@ -132,18 +132,18 @@ sudo ethtool eth4
 
 ### Temporary IP Address Assignment
 
-For temporary network configurations, you can use the ip command which is also found on most other GNU/Linux operating systems. The ip command allows you to configure settings which take effect immediately, however they are not persistent and will be lost after a reboot.
+For temporary network configurations, you can use the `ip` command which is also found on most other GNU/Linux operating systems. The `ip` command allows you to configure settings which take effect immediately, however they are not persistent and will be lost after a reboot.
 
-To temporarily configure an IP address, you can use the ip command in the following manner. Modify the IP address and subnet mask to match your network requirements:
+To temporarily configure an IP address, you can use the `ip` command in the following manner. Modify the IP address and subnet mask to match your network requirements:
 `sudo ip addr add 10.102.66.200/24 dev enp0s25`
 
-The ip can then be used to set the **link** (i.e. network device) up or down:
+The `ip` command can then be used to set the **link** (i.e. network device) up or down:
 ```
 ip link set dev enp0s25 up
 ip link set dev enp0s25 down
 ```
 
-To verify the IP address configuration of enp0s25, you can use the ip command in the following manner:
+To verify the IP address configuration of enp0s25, you can use the `ip` command in the following manner:
 ```
 ip address show dev enp0s25
 >10: enp0s25: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
@@ -154,7 +154,7 @@ ip address show dev enp0s25
 >       valid_lft forever preferred_lft forever6
 ```
 
-To configure a default gateway, you can use the ip command in the following manner. Modify the default gateway address to match your network requirements:
+To configure a default gateway, you can use the `ip` command in the following manner. Modify the default gateway address to match your network requirements:
 `sudo ip route add default via 10.102.66.1`
 
 To verify your default gateway configuration, you can use the ip command in the following manner:
@@ -171,10 +171,10 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 ```
 
-If you no longer need this configuration and wish to purge all IP configuration from an interface, you can use the ip command with the flush option as shown below.
+If you no longer need this configuration and wish to purge all IP configuration from an interface, you can use the `ip` command with the flush option as shown below.
 `ip addr flush eth0`
 
-> Note: Flushing the IP configuration using the ip command does not clear the contents of /etc/resolv.conf. You must remove or modify those entries manually, or reboot which should also cause /etc/resolv.conf, which is a symlink to /run/systemd/resolve/stub-resolv.conf, to be re-written.
+> Note: Flushing the IP configuration using the `ip` command does not clear the contents of /etc/resolv.conf. You must remove or modify those entries manually, or reboot which should also cause /etc/resolv.conf, which is a symlink to /run/systemd/resolve/stub-resolv.conf, to be re-written.
 
 ### Dynamic IP Address Assignment (DHCP Client)
 
@@ -235,7 +235,7 @@ Name resolution as it relates to IP networking is the process of mapping IP addr
 
 ### DNS Client Configuration
 
-Traditionally, the file /etc/resolv.conf was a static configuration file that rarely needed to be changed or automatically changed via DCHP client hooks. systemd-resolved handles name server configuration, and it should be interacted with through the `systemd-resolve` command. Netplan configures systemd-resolved to generate a list of nameservers and domains to put in /etc/resolv.conf, which is a symlink:
+Traditionally, the file /etc/resolv.conf was a static configuration file that rarely needed to be changed or automatically changed via DCHP client hooks. `systemd-resolved` handles name server configuration, and it should be interacted with through the `systemd-resolve` command. Netplan configures `systemd-resolved` to generate a list of nameservers and domains to put in `/etc/resolv.conf`, which is a symlink:
 `/etc/resolv.conf -> ../run/systemd/resolve/stub-resolv.conf`
 
 To configure the resolver, add the IP addresses of the nameservers that are appropriate for your network to the netplan configuration file. You can also add a list of search domains (DNS suffixes), which are used when a non-fully qualified hostname is given. The resulting file might look like the following:
@@ -281,7 +281,7 @@ If no matches are found, the DNS server will provide a result of notfound and th
 
 ---
 
-If you are using NetworkManager in a desktop version of Ubuntu, editing /etc/netplan/*.yaml could not be enough.
+If you are using NetworkManager in a desktop version of Ubuntu, editing `/etc/netplan/*.yaml` could not be enough.
 
 If your current DNS server still points to your router (i.e. 192.168.1.1), there are at least two ways to solve this problem:
 
@@ -295,7 +295,7 @@ If your current DNS server still points to your router (i.e. 192.168.1.1), there
 
 > Note: 'Automatic (DHCP) addresses only' means that the network you are connecting to uses a DHCP server to assign IP addresses but you want to assign DNS servers manually.
 
-> Note: NetworkManager saves these settings in /etc/NetworkManager/system-connections/[name-of-your-connection].
+> Note: NetworkManager saves these settings in `/etc/NetworkManager/system-connections/[name-of-your-connection]`.
 
 2) or, if your DNS settigs are messed up by multiple programs trying to update it, you can use `resolvconf`:
 ```
@@ -303,19 +303,19 @@ sudo apt install resolvconf
 sudo systemctl enable --now resolvconf.service
 ```
 
-Then, edit /etc/resolvconf/resolv.conf.d/head and insert the nameservers youu want as:
+Then, edit `/etc/resolvconf/resolv.conf.d/head` and insert the nameservers you want as:
 ```
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 ```
 
-Finally, to update /etc/resolv.conf by typing: `sudo resolvconf -u`
+Finally, to update `/etc/resolv.conf` by typing: `sudo resolvconf -u`
 
-The /etc/resolv.conf file will be replaced by a symbolic link to /etc/resolvconf/run/resolv.conf, so that the system resolver will use this file instead of the previously symlinked /run/systemd/resolve/stub-resolv.conf.
+The `/etc/resolv.conf` file will be replaced by a symbolic link to `/etc/resolvconf/run/resolv.conf`, so that the system resolver will use this file instead of the previously symlinked `/run/systemd/resolve/stub-resolv.conf`.
 
 ### Static Hostnames
 
-Static hostnames are locally defined hostname-to-IP mappings located in the file `/etc/hosts`. Entries in the hosts file will have precedence over DNS by default. This means that if your system tries to resolve a hostname and it matches an entry in /etc/hosts, it will not attempt to look up the record in DNS. In some configurations, especially when Internet access is not required, servers that communicate with a limited number of resources can be conveniently set to use static hostnames instead of DNS.
+Static hostnames are locally defined hostname-to-IP mappings located in the file `/etc/hosts`. Entries in the hosts file will have precedence over DNS by default. This means that if your system tries to resolve a hostname and it matches an entry in `/etc/hosts`, it will not attempt to look up the record in DNS. In some configurations, especially when Internet access is not required, servers that communicate with a limited number of resources can be conveniently set to use static hostnames instead of DNS.
 
 The following is an example of a hosts file where a number of local servers have been identified by simple hostnames, aliases and their equivalent Fully Qualified Domain Names (FQDNs):
 ```
@@ -327,18 +327,18 @@ The following is an example of a hosts file where a number of local servers have
 10.0.0.14   server4 server4.example.com file
 ```
 
-> Note: In the above example, notice that each of the servers have been given aliases in addition to their proper names and FQDN's. Server1 has been mapped to the name vpn, server2 is referred to as mail, server3 as www, and server4 as file.
+> Note: In the above example, notice that each of the servers have been given aliases in addition to their proper names and FQDN's. `server1` has been mapped to the name _vpn_, `server2` is referred to as _mail_, `server3` as _www_, and `server4` as _file_.
 
-To block ads and tracking sites, append to /etc/hosts the MVPS HOSTS [file](https://winhelp2002.mvps.org/hosts.txt).
+To block ads and tracking sites, append to `/etc/hosts` the MVPS HOSTS [file](https://winhelp2002.mvps.org/hosts.txt).
 
 ### Name Service Switch Configuration
 
-The order in which your system selects a method of resolving hostnames to IP addresses is controlled by the *Name Service Switch* (**NSS**) configuration file `/etc/nsswitch.conf`. As mentioned in the previous section, typically static hostnames defined in the systems /etc/hosts file have precedence over names resolved from DNS. The following is an example of the line responsible for this order of hostname lookups in the file /etc/nsswitch.conf:
+The order in which your system selects a method of resolving hostnames to IP addresses is controlled by the *Name Service Switch* (**NSS**) configuration file `/etc/nsswitch.conf`. As mentioned in the previous section, typically static hostnames defined in the systems `/etc/hosts` file have precedence over names resolved from DNS. The following is an example of the line responsible for this order of hostname lookups in the file `/etc/nsswitch.conf`:
 `hosts:          files mdns4_minimal [NOTFOUND=return] dns mdns4`
 
 The entries listed are:
 
-- `files` first tries to resolve static hostnames located in /etc/hosts
+- `files` first tries to resolve static hostnames located in `/etc/hosts`
 
 - `mdns4_minimal` attempts to resolve the name using Multicast DNS
 
@@ -348,14 +348,14 @@ The entries listed are:
 
 - `mdns4` represents a Multicast DNS query.
 
-To modify the order of the above mentioned name resolution methods, you can simply change the `hosts:` string to the value of your choosing. For example, if you prefer to use legacy Unicast DNS versus Multicast DNS, you can change the string in /etc/nsswitch.conf as shown below:
+To modify the order of the above mentioned name resolution methods, you can simply change the `hosts:` string to the value of your choosing. For example, if you prefer to use legacy Unicast DNS versus Multicast DNS, you can change the string in `/etc/nsswitch.conf` as shown below:
 `hosts:          files dns [NOTFOUND=return] mdns4_minimal mdns4`
 
 ### Bridging
 
 Bridging multiple interfaces is a more advanced configuration, but is very useful in multiple scenarios. One scenario is setting up a bridge with multiple network interfaces, then using a firewall to filter traffic between two network segments. Another scenario is using bridge on a system with one interface to allow virtual machines direct access to the outside network. The following example covers the latter scenario.
 
-Configure the bridge by editing your netplan configuration found in /etc/netplan/:
+Configure the bridge by editing your netplan configuration found in `/etc/netplan/`:
 ```
 network:
   version: 2
